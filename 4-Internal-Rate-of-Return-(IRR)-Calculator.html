@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .calculator {
+            background-color: #2b2b2b;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            width: 300px;
+        }
+
+        h2 {
+            color: #ffffff;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #aaaaaa;
+        }
+
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #555555;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #333333;
+            color: #ffffff;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4caf50;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+    </style>
+    <title>Internal Rate of Return (IRR) Calculator</title>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Internal Rate of Return (IRR) Calculator</h2>
+        <label for="cashFlows">Cash Flows (comma-separated, e.g., -1000, 500, 600, 800):</label>
+        <input type="text" id="cashFlows" placeholder="Enter cash flows">
+
+        <button onclick="calculateIRR()">Calculate IRR</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function calculateIRR() {
+            const cashFlowsInput = document.getElementById('cashFlows').value;
+
+            if (!cashFlowsInput) {
+                alert('Please enter valid cash flows.');
+                return;
+            }
+
+            const cashFlows = cashFlowsInput.split(',').map(flow => parseFloat(flow.trim()));
+            const irr = calculateInternalRateOfReturn(cashFlows);
+
+            const resultElement = document.getElementById('result');
+            resultElement.innerHTML = `Internal Rate of Return (IRR): ${irr.toFixed(2)}%`;
+        }
+
+        function calculateInternalRateOfReturn(cashFlows) {
+            const epsilon = 0.0001;
+            let lowerBound = -1.0;
+            let upperBound = 1.0;
+
+            while (upperBound - lowerBound > epsilon) {
+                const guess = (lowerBound + upperBound) / 2;
+                const npv = calculatePresentValue(guess, cashFlows);
+
+                if (npv > 0) {
+                    lowerBound = guess;
+                } else {
+                    upperBound = guess;
+                }
+            }
+
+            return (lowerBound + upperBound) / 2 * 100;
+        }
+
+        function calculatePresentValue(rate, cashFlows) {
+            let presentValue = 0;
+
+            for (let i = 0; i < cashFlows.length; i++) {
+                presentValue += cashFlows[i] / Math.pow(1 + rate, i);
+            }
+
+            return presentValue;
+        }
+    </script>
+</body>
+</html>
